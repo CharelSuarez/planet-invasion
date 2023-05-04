@@ -7,6 +7,7 @@
 # CSCB58 Winter 2023 Assembly Final Project
 # University of Toronto, Scarborough
 #
+# Student: Charel Suarez-Tapanes, 1008336052, tapanesc, charel.suarez@mail.utoronto.ca
 #
 # Bitmap Display Configuration:
 # - Unit width in pixels: 8
@@ -36,6 +37,8 @@
 # - yes, and please share this project github link as well!
 #
 # Any additional information that the TA needs to know:
+# - tap keys instead of holding them down, for best movement control
+# - modify ALIEN_ATTACK_SPEED to a higher value if you want to make enemies easier (or harder)
 #
 #####################################################################
 
@@ -267,6 +270,7 @@ main:
 	draw_start:
 	li $v0, 30
 	syscall
+	andi $a0 $a0 0x7FFFFFFF # time bug band-aid
 	move $s5 $a0 # s5 = time
 	lw $t0 LAST_RENDER
 	sub $t3 $s5 $t0
@@ -1918,14 +1922,20 @@ handle_inputs:
 			j after_handle_inputs
 		after_input_d:
 	
-		# Handle Space
+		# Handle Space/W
 		li $t1 32
-		bne $t0 $t1 after_input_space # if key == space
-		lb $t2 31($s7)
-		beqz $t2 after_input_space # && is on ground
-			sb $t1 30($s7)
-			sw $s6 16($s7)
-			j after_handle_inputs
+		beq $t0 $t1 input_space # if key == space
+		li $t1 87
+		beq $t0 $t1 input_space # if key == W
+		li $t1 119
+		beq $t0 $t1 input_space # if key == w
+		j after_input_space
+			input_space:
+			lb $t2 31($s7)
+			beqz $t2 after_input_space # && is on ground
+				sb $t1 30($s7)
+				sw $s6 16($s7)
+				j after_handle_inputs
 		after_input_space:
 		
 		# Handle P (reset)
